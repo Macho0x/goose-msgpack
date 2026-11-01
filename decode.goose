@@ -122,9 +122,9 @@ fn boolean(src: u8[:], at: i64&) -> bool, bool {
 fn bits_f32(u: u32) -> f32 {
     var image: u8[>..] = [];
     image.push(4);
-    image.push(u as! u8);
-    image.push((u >> 8) as! u8);
-    image.push((u >> 16) as! u8);
+    image.push((u & 0xff) as! u8);
+    image.push(((u >> 8) & 0xff) as! u8);
+    image.push(((u >> 16) & 0xff) as! u8);
     image.push((u >> 24) as! u8);
     var a, ok = from_bytes<f32[>..]>(image);
     if !ok || a.len != 1 { abort("msgpack: float bits"); }
@@ -136,7 +136,7 @@ fn bits_f64(u: u64) -> f64 {
     image.push(8);
     var x = u;
     for i in 0..8 {
-        image.push(x as! u8);
+        image.push((x & 0xff) as! u8);
         x = x >> 8;
     }
     var a, ok = from_bytes<f64[>..]>(image);
@@ -147,7 +147,7 @@ fn bits_f64(u: u64) -> f64 {
 fn float32(src: u8[:], at: i64&) -> f32, bool {
     if at >= src.len || src[at] != 0xca { return 0.0, false; }
     if !have(src, at, 5) { return 0.0, false; }
-    let bits = be(src, at + 1, 4) as! u32;
+    let bits = be(src, at + 1, 4) as u32;
     at += 5;
     return bits_f32(bits), true;
 }

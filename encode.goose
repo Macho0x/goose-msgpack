@@ -21,25 +21,25 @@ fn fits(n: i64) -> bool { n >= 0 && n <= MAX_LEN }
 
 fn put_u16(out: u8[>..]&, v: u16) {
     out.push((v >> 8) as! u8);
-    out.push(v as! u8);
+    out.push((v & 0xff) as! u8);
 }
 
 fn put_u32(out: u8[>..]&, v: u32) {
     out.push((v >> 24) as! u8);
-    out.push((v >> 16) as! u8);
-    out.push((v >> 8) as! u8);
-    out.push(v as! u8);
+    out.push(((v >> 16) & 0xff) as! u8);
+    out.push(((v >> 8) & 0xff) as! u8);
+    out.push((v & 0xff) as! u8);
 }
 
 fn put_u64(out: u8[>..]&, v: u64) {
     out.push((v >> 56) as! u8);
-    out.push((v >> 48) as! u8);
-    out.push((v >> 40) as! u8);
-    out.push((v >> 32) as! u8);
-    out.push((v >> 24) as! u8);
-    out.push((v >> 16) as! u8);
-    out.push((v >> 8) as! u8);
-    out.push(v as! u8);
+    out.push(((v >> 48) & 0xff) as! u8);
+    out.push(((v >> 40) & 0xff) as! u8);
+    out.push(((v >> 32) & 0xff) as! u8);
+    out.push(((v >> 24) & 0xff) as! u8);
+    out.push(((v >> 16) & 0xff) as! u8);
+    out.push(((v >> 8) & 0xff) as! u8);
+    out.push((v & 0xff) as! u8);
 }
 
 // to_bytes prefixes a uleb length. One f32 is length 4, then four
@@ -67,10 +67,10 @@ fn boolean(out: u8[>..]&, v: bool) {
 }
 
 fn uint(out: u8[>..]&, v: u64) {
-    if v <= 127 { out.push(v as! u8); return; }
-    if v <= 255 { out.push(0xcc); out.push(v as! u8); return; }
-    if v <= 65535 { out.push(0xcd); put_u16(out, v as! u16); return; }
-    if v <= 4294967295 { out.push(0xce); put_u32(out, v as! u32); return; }
+    if v <= 127 { out.push(v as u8); return; }
+    if v <= 255 { out.push(0xcc); out.push(v as u8); return; }
+    if v <= 65535 { out.push(0xcd); put_u16(out, v as u16); return; }
+    if v <= 4294967295 { out.push(0xce); put_u32(out, v as u32); return; }
     out.push(0xcf);
     put_u64(out, v);
 }
@@ -98,36 +98,36 @@ fn float64(out: u8[>..]&, v: f64) {
 fn str(out: u8[>..]&, s: u8[:]) {
     let n = s.len;
     if !fits(n) { abort("msgpack: a length must fit in 32 bits"); }
-    if n <= 31 { out.push(0xa0 + (n as! u8)); }
-    else if n <= 255 { out.push(0xd9); out.push(n as! u8); }
-    else if n <= 65535 { out.push(0xda); put_u16(out, n as! u16); }
-    else { out.push(0xdb); put_u32(out, n as! u32); }
+    if n <= 31 { out.push(0xa0 + (n as u8)); }
+    else if n <= 255 { out.push(0xd9); out.push(n as u8); }
+    else if n <= 65535 { out.push(0xda); put_u16(out, n as u16); }
+    else { out.push(0xdb); put_u32(out, n as u32); }
     out.append(s);
 }
 
 fn bin(out: u8[>..]&, b: u8[:]) {
     let n = b.len;
     if !fits(n) { abort("msgpack: a length must fit in 32 bits"); }
-    if n <= 255 { out.push(0xc4); out.push(n as! u8); }
-    else if n <= 65535 { out.push(0xc5); put_u16(out, n as! u16); }
-    else { out.push(0xc6); put_u32(out, n as! u32); }
+    if n <= 255 { out.push(0xc4); out.push(n as u8); }
+    else if n <= 65535 { out.push(0xc5); put_u16(out, n as u16); }
+    else { out.push(0xc6); put_u32(out, n as u32); }
     out.append(b);
 }
 
 fn array(out: u8[>..]&, n: i64) {
     if !fits(n) { abort("msgpack: a length must fit in 32 bits"); }
-    if n <= 15 { out.push(0x90 + (n as! u8)); return; }
-    if n <= 65535 { out.push(0xdc); put_u16(out, n as! u16); return; }
+    if n <= 15 { out.push(0x90 + (n as u8)); return; }
+    if n <= 65535 { out.push(0xdc); put_u16(out, n as u16); return; }
     out.push(0xdd);
-    put_u32(out, n as! u32);
+    put_u32(out, n as u32);
 }
 
 fn map(out: u8[>..]&, n: i64) {
     if !fits(n) { abort("msgpack: a length must fit in 32 bits"); }
-    if n <= 15 { out.push(0x80 + (n as! u8)); return; }
-    if n <= 65535 { out.push(0xde); put_u16(out, n as! u16); return; }
+    if n <= 15 { out.push(0x80 + (n as u8)); return; }
+    if n <= 65535 { out.push(0xde); put_u16(out, n as u16); return; }
     out.push(0xdf);
-    put_u32(out, n as! u32);
+    put_u32(out, n as u32);
 }
 
 fn ext(out: u8[>..]&, typ: i8, data: u8[:]) {
@@ -138,9 +138,9 @@ fn ext(out: u8[>..]&, typ: i8, data: u8[:]) {
     else if n == 4 { out.push(0xd6); }
     else if n == 8 { out.push(0xd7); }
     else if n == 16 { out.push(0xd8); }
-    else if n <= 255 { out.push(0xc7); out.push(n as! u8); }
-    else if n <= 65535 { out.push(0xc8); put_u16(out, n as! u16); }
-    else { out.push(0xc9); put_u32(out, n as! u32); }
+    else if n <= 255 { out.push(0xc7); out.push(n as u8); }
+    else if n <= 65535 { out.push(0xc8); put_u16(out, n as u16); }
+    else { out.push(0xc9); put_u32(out, n as u32); }
     out.push(typ as! u8);
     out.append(data);
 }

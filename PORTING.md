@@ -9,3 +9,5 @@ It does not port timestamps. The MessagePack timestamp extension is ext type -1 
 It does not port derive macros. rmp-serde generates implementations with `Serialize` and `Deserialize` derives. Goose has no proc macros, and this package does not add a substitute.
 
 rmp's fixed-width writers, such as `write_u8` and `write_i16`, always emit one marker. Those are absent. `encode::int` and `encode::uint` always pick the shortest form.
+
+A byte taken from a masked or shifted word stays an unchecked cast. A length that a comparison already bounded is checked. A length past `2^32-1` still aborts. A negative integer keeps the unchecked cast because those bits are the two's-complement width.

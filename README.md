@@ -6,7 +6,7 @@
 
 <p align="center">
   📦 MessagePack for <a href="https://github.com/aardappel/goose">Goose</a><br>
-  <strong>0.2</strong> · <a href="LICENSE">Apache-2.0</a>
+  <strong>0.2.1</strong> · <a href="LICENSE">Apache-2.0</a>
 </p>
 
 Reads and writes [MessagePack](https://github.com/msgpack/msgpack/blob/master/spec.md) bytes. Integers use the shortest form, the same choice as rmp's `write_sint` and `write_uint`. A map keeps the order you append its pairs in. That is the order `rmp_serde::to_vec_named` uses for struct fields.
