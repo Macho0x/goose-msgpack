@@ -6,7 +6,7 @@
 
 <p align="center">
   📦 MessagePack for <a href="https://github.com/aardappel/goose">Goose</a><br>
-  <strong>0.2.1</strong> · <a href="LICENSE">Apache-2.0</a>
+  <strong>0.2.2</strong> · <a href="LICENSE">Apache-2.0</a>
 </p>
 
 Reads and writes [MessagePack](https://github.com/msgpack/msgpack/blob/master/spec.md) bytes. Integers use the shortest form, the same choice as rmp's `write_sint` and `write_uint`. A map keeps the order you append its pairs in. That is the order `rmp_serde::to_vec_named` uses for struct fields.
@@ -53,6 +53,17 @@ A good run prints `msgpack ok`.
 Positive integers use the unsigned family, including a positive fixint. Negative integers use a negative fixint or a signed header. `float32` stays 32 bits and `float64` stays 64 bits, both IEEE-754 big-endian. `str` and `bin` are raw bytes, with no UTF-8 check. Ext type -1 stays raw bytes.
 
 `value::decode` clears the pool you pass, then reads one value. Bytes after that value are left in the buffer. The root is the last node. `PORTING.md` lists what this package leaves out of rmp, including serde and timestamps.
+
+## Benchmarks
+
+`bench.goose` times this package. The row names stay fixed, so a clang run before a change and a clang run after it compare.
+
+```sh
+goose build -o msgpack-bench bench.goose --cc clang
+./msgpack-bench
+```
+
+`goose bench.goose` runs in TinyCC. That is not a timing result. Numbers depend on the machine, so this page does not publish them.
 
 ## License
 
